@@ -1,0 +1,150 @@
+//Create an array of quesiton objects
+var questions = [
+  {
+    question: "True or False?",
+    answer: 0,
+    answers: ["True", "False"]
+  },
+  {
+    question: "True or False?",
+    answer: 0,
+    answers: ["True", "False"]
+  },
+  {
+    question: "True or False?",
+    answer: 0,
+    answers: ["True", "False"]
+  },
+  {
+    question: "True or False?",
+    answer: 0,
+    answers: ["True", "False"]
+  },
+  {
+    question: "True or False?",
+    answer: 0,
+    answers: ["True", "False"]
+  },
+  {
+    question: "Multiple Choice?",
+    answer: 1,
+    answers: ["A", "B", "C", "D"]
+  }
+  ,
+  {
+    question: "Multiple Choice?",
+    answer: 1,
+    answers: ["A", "B", "C", "D"]
+  },
+  {
+    question: "Multiple Choice?",
+    answer: 1,
+    answers: ["A", "B", "C", "D"]
+  },
+  {
+    question: "Multiple Choice?",
+    answer: 1,
+    answers: ["A", "B", "C", "D"]
+  },
+  {
+    question: "Multiple Choice?",
+    answer: 1,
+    answers: ["A", "B", "C", "D"]
+  }
+];
+
+//We delcare our variables.
+var current =0;
+var score =0;
+var answered = false; 
+
+//button click events
+onEvent("Startbutton", "click", function( ) {
+  setScreen("QuizScreen");
+  QuizTime();
+});
+//Answer Buttons
+onEvent("button2", "click", function( ) {
+  checkAnswer(2);
+});
+//get or set the text of a button or element
+var x = getText("button1");
+setText("button1", x);
+//show/hide elements
+hideElement("id");
+showElement("id");
+
+
+//This Functions loads questions
+function QuizTime(){
+  answered = false;
+  hideAllButtons(); 
+  var q = questions[current];
+  setText("questionText", q.question);
+  setText("scoreLabel", "Score: " + score); 
+  
+  //loop that creates the buttons
+  for (var i =0; i<q.answers.length; i++){
+    showElement("answer" + i);
+    setText("answer" + i, q.answers[i]);
+  }
+}
+
+//This Function hides the buttons
+function hideAllButtons(){
+  for (var i = 0; i < 4; i++){
+    hideElement("answer" + i);
+  } 
+}
+
+//function to check answers
+function checkAnswer(n) {
+  //is correct or not? tally score
+   if (answered){
+    answered = true;
+  }
+  var q = questions[current];
+
+  if (n == q.answer) {
+    score++;
+    setText("scoreLabel", "Correct! Score: " + score);
+  } else {
+    setText("scoreLabel", "Wrong! Score: " + score);
+  }
+} 
+
+//Tallys Score
+function endGame() {
+  setScreen("endScreen");
+  setText("finalScore", "Final Score: " + score + "/" + questions.length);
+  setText("endMessage", "Quiz Complete!");
+}
+
+//Button Events 
+onEvent("answer0", "click", function() { checkAnswer(0); });
+onEvent("answer1", "click", function() { checkAnswer(1); });
+onEvent("answer2", "click", function() { checkAnswer(2); });
+onEvent("answer3", "click", function() { checkAnswer(3); }); 
+
+//Next Question Button Event 
+onEvent("nextButton", "click", function() {
+
+  // Skipping counts as wrong
+  if (!answered) {
+    setText("scoreLabel", "Skipped! Score: " + score);
+  }
+
+  current++;
+
+  // Check if quiz is finished
+  if (current >= questions.length) {
+    endGame();
+  } else {
+    QuizTime();
+  }
+});  
+//End Game Tally Event
+onEvent("startScreen", "click", function( ) {
+	console.log("startScreen clicked!");
+});
+
