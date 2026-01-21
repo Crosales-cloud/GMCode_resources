@@ -1,0 +1,28 @@
+//Create Event 
+// Inherit the Attack parent event
+event_inherited();
+
+function init(_wielder = noone)
+{
+	if(_wielder != noone)
+	{
+		wielder = _wielder;
+		dir_current = wielder.dir_current;
+		image_angle = dir_current;
+	}
+}
+
+//direction function
+function set_direction(_direction = 0)
+{
+	if(_direction != 0)
+	{
+		dir_current = _direction;
+		image_angle = dir_current;
+	}
+}
+
+//Outside Room/Ouside View 0 Event
+instance_destroy(self)
+
+
