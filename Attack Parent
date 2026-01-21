@@ -1,0 +1,28 @@
+//Create Event 
+wielder = noone;
+hit_list = [];
+dir_current = 0;
+offset = 32;
+delay_multiplier = 1;
+attack = 10;
+through_walls = false;
+
+
+function init(_wielder = noone)
+{
+	if(_wielder != noone)
+	{
+		wielder = _wielder;
+		dir_current = wielder.dir_current;
+		image_angle = dir_current;
+	}
+}
+
+//Object Collision Event 
+instance_destroy(self) 
+
+//Outside Of Room Event 
+instance_destroy(self)
+
+//Outside Of View Event 
+instance_destroy(self)
