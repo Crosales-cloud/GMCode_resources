@@ -1,0 +1,58 @@
+//Create Event 
+attack = 5;
+hp_start = 45;
+hp = hp_start;
+
+
+states = {
+	DEAD: 0,
+	ACTIVE: 1,
+}
+state = states.ACTIVE;
+
+function get_hit(_attack = noone)
+{
+	if(_attack != noone && state != states.DEAD)
+	{
+		if(array_contains(_attack.hit_list, self))
+		{
+			//do absolutely nothing
+		}
+		else{
+			//take damage
+			hp -= _attack.attack;
+			//add to hit list
+			array_push(_attack.hit_list, self);
+		}
+	}
+} 
+
+//Step Event 
+//death state
+if(hp <= 0 || state == states.DEAD)
+{
+	hp = 0;
+	state = states.DEAD;
+} 
+//Draw Event 
+//death state
+if(hp <= 0 || state == states.DEAD)
+{
+	hp = 0;
+	state = states.DEAD;
+} 
+//Object Collion Event
+if(state == states.DEAD || array_contains(other.hit_list, self))
+{
+	//nothing
+}
+else {
+	hp -= other.attack;
+	array_push(other.hit_list, self);
+}
+//Death state
+if(hp <= 0 || state == states.DEAD)
+{
+	hp = 0;
+	state = states.DEAD;
+}
