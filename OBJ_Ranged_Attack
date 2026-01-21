@@ -1,0 +1,15 @@
+//Create Event 
+// Inherit the parent event
+event_inherited();
+attack = 10
+speed_default = 6;
+
+//Step Event 
+// Move
+x += lengthdir_x(speed_default, dir_current);
+y += lengthdir_y(speed_default, dir_current);
+
+if( array_length(hit_list) > 0)
+{
+	instance_destroy(self);
+}
