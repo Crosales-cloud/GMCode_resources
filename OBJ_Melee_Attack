@@ -1,0 +1,30 @@
+//Create Event
+// Inherit the attack parent event
+event_inherited();
+offset = 5;
+attack = 10;
+
+//Step Event 
+//countdown for swing
+if (image_speed > 0)
+{
+	if image_index > image_number - 1 instance_destroy();
+}
+//Code below makes weapon move with wielder
+//uses the sprite animation to rotate
+if(instance_exists(wielder))
+{
+	
+	dir_current = wielder.dir_current;
+	image_angle = dir_current;
+	if(dir_current > 90 && dir_current < 270)
+	{
+		image_yscale = -0.7;
+	}
+	else
+	{
+		image_yscale = 0.7;
+	}
+	x = wielder.x + lengthdir_x(offset,dir_current);
+	y = wielder.y + lengthdir_y(offset,dir_current);
+}
