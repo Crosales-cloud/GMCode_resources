@@ -1,0 +1,93 @@
+// Inherit the Attack parent event
+event_inherited();
+
+attack = 555;
+speed_default = 5;
+dir_current = 0;
+speed_rotate = 5;
+target = noone;
+delay_multiplier = 1.5;
+speed_default = 7;
+through_walls = true;
+
+//Step Event 
+if( array_length(hit_list) > 0 )
+{
+	instance_destroy(self);
+}
+
+//find nearest enemy, no target, destroyed target, dead target, or empty target variable
+if (target == noone || !instance_exists(target) || target.state = target.states.DEAD || target <= 0)
+{
+	//find nearest enemy
+	var nearest_distance = room_width + room_height;
+	var nearest_enemy = noone;
+	
+	with (enemy_parent)
+	{
+		//skip if target is in the dead state
+		if(state == states.DEAD)
+		{
+			continue;
+		}
+		//get distance between attack and enemy
+		var dist = point_distance(x, y, other.x, other.y);
+		//save the shortest distance
+		if (dist < nearest_distance)
+		{
+			nearest_distance = dist;
+			nearest_enemy = self.id;
+		}
+	}
+	//set target to the nearest enemy
+	target = nearest_enemy;
+}
+
+//rotate to direction towards target
+if (instance_exists(target))
+{
+	var target_angle = point_direction(x, y, target.x, target.y);
+	var current_angle = dir_current;
+	
+	//calculate angle difference
+	var angle_diff = target_angle - current_angle;
+	
+	//adjust for shortest rotation direction
+	//if the angle_diff is more that +/-180 then we add/subtract 360
+	if (angle_diff > 180)
+	{
+		angle_diff -= 360; //rotate counter-clockwise
+	}
+	else if (angle_diff < -180)
+	{
+		angle_diff += 360; //rotate clockwise
+	}
+	
+	//clamp the desired change to the rotation speed
+	var desired_change = clamp(angle_diff, -speed_rotate, speed_rotate);
+	
+	//apply the change to current angle
+	dir_current += desired_change;
+}
+
+dir_current = normalize_angle(dir_current);
+
+//set the visible angle
+image_angle = dir_current;
+//flip sprite based on the angle
+if (dir_current > 90 && dir_current < 270)
+{
+	//flip sprite to face left
+	//image_xscale = -1;
+	image_yscale = -1;
+}
+else
+{
+	//keep sprite facing right
+	image_xscale = 1;
+	image_yscale = 1;
+}
+
+//move the missile!
+x += lengthdir_x(speed_default, dir_current);
+y += lengthdir_y(speed_default, dir_current);
