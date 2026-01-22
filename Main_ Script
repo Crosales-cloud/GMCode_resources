@@ -1,0 +1,12 @@
+function main()
+{
+	//main camera
+	global._camera = view_get_camera(0); // get camera object
+	global._camera_width = room_width;
+	global._camera_height = room_height;
+	if(view_visible[0])
+	{
+		global._camera_width = camera_get_view_width(global._camera);
+		global._camera_height = camera_get_view_height(global._camera);
+	}
+}
