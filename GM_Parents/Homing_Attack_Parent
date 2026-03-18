@@ -1,0 +1,54 @@
+//Create Event 
+// Inherit the Attack parent event
+event_inherited();
+
+//Hit a wall?
+function terrain_check(_obj = noone)
+{
+	if(_obj == noone)
+	{
+		_obj = obj_wall
+	}
+	if(through_walls != true)
+	{
+		if (instance_place(x,y, _obj) != noone)
+		{
+			instance_destroy(self);
+		}
+	}
+}
+
+function init(_wielder = noone)
+{
+	if(_wielder != noone)
+	{
+		wielder = _wielder;
+		dir_current = wielder.dir_current;
+		image_angle = dir_current;
+	}
+}
+
+//hit enemy?
+function enemy_check(_obj = noone)
+{
+	if(_obj == noone)
+	{
+		_obj = enemy_parent;
+	}
+	//check if enemy is there
+	var _enemy = instance_place(x, y, _obj);
+	if (_enemy != noone)
+	{
+		with(_enemy)
+		{
+			get_hit(other);
+		}
+	}
+} 
+
+//End Step Event 
+//check if it hits a wall
+terrain_check();
+
+//hit enemy?
+enemy_check();
