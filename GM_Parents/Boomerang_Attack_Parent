@@ -1,0 +1,48 @@
+//Create Event 
+// Inherit the Attack parent event
+event_inherited();
+
+through_walls = false;
+//same as homing missile vv /but I like having it all organized
+
+//Hit a wall?
+function terrain_check(_obj = noone)
+{
+	if(_obj == noone)
+	{
+		_obj = obj_wall
+	}
+	if( through_walls != true)
+	{
+		if (instance_place(x, y, _obj) != noone)
+		{
+			instance_destroy(self);
+		}
+	}
+}
+
+
+//hit enemy?
+function enemy_check(_obj = noone)
+{
+	if(_obj == noone)
+	{
+		_obj = enemy_parent;
+	}
+	//check if enemy is there
+	var _enemy = instance_place(x, y, _obj);
+	if (_enemy != noone)
+	{
+		with(_enemy)
+		{
+			get_hit(other);
+		}
+	}
+} 
+
+//End Step Event 
+//check if it hits a wall
+terrain_check();
+
+//hit enemy?
+enemy_check();
