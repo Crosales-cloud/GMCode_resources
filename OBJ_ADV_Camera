@@ -1,0 +1,79 @@
+//Create Event 
+global_init();
+//how far to move each step
+smooth_x = 0;
+smooth_y = 0;
+//how fast to finally get into place/ smaller = slower
+smooth_speed = .05;
+//speed for contunious panning
+speed_pan = 16;
+//boundary variables
+max_x = room_width - global.camera[0].width;
+max_y = room_height - global.camera[0].height;
+
+function camera_activate_within()
+{	
+	
+	instance_deactivate_layer("enemies");
+	var _camera_x = camera_get_view_x(global.camera[0].ID);
+	var _camera_y = camera_get_view_y(global.camera[0].ID);
+	instance_activate_region(_camera_x, _camera_y, global.camera[0].width, global.camera[0].height, true);
+	
+} 
+
+//Step Event 
+var _desired_x = 0;
+var _desired_y = 0;
+
+if(instance_exists(obj_player)){
+	_desired_x = obj_player.x / global.camera[0].width;
+	_desired_x = floor(_desired_x);
+	_desired_x *= global.camera[0].width;
+	_desired_x = clamp(_desired_x, 0, max_x);
+
+	_desired_y = obj_player.y / global.camera[0].height;
+	_desired_y = floor(_desired_y);
+	_desired_y *= global.camera[0].height;
+	_desired_y = clamp(_desired_y, 0, max_y);
+}
+	//get current lo//constant speed pan
+	var _camera_x = camera_get_view_x(global.camera[0].ID);
+	var _camera_y = camera_get_view_y(global.camera[0].ID);
+	//dont move more than our speed pan per frame in either direction
+	var _dx = clamp(_desired_x - _camera_x, -speed_pan, +speed_pan)
+	var _dy = clamp(_desired_y - _camera_y, -speed_pan, +speed_pan)
+	camera_set_view_pos(global.camera[0].ID, _camera_x + _dx, _camera_y + _dy)
+//smoothly move and slide into final position when player stops
+smooth_x += (_desired_x - smooth_x) * smooth_speed;
+smooth_y += (_desired_y - smooth_y) * smooth_speed;
+camera_set_view_pos(global.camera[0].ID, smooth_x, smooth_y); 
+
+//Room Start Event 
+//new room, new room boundaries
+max_x = room_width - global.camera[0].width;
+max_y = room_height - global.camera[0].height;
+
+//skip the movement if theres no player
+if(instance_exists(obj_player))
+{
+	exit;
+}
+
+var _desired_x = 0;
+var _desired_y = 0;
+if(instance_exists(obj_player)){
+	_desired_x = obj_player.x / global.camera[0].width;
+	_desired_x = floor(_desired_x);
+	_desired_x *= global.camera[0].width;
+	_desired_x = clamp(_desired_x, 0, max_x);
+
+	_desired_y = obj_player.y / global.camera[0].height;
+	_desired_y = floor(_desired_y);
+	_desired_y *= global.camera[0].height;
+	_desired_y = clamp(_desired_y, 0, max_y);
+}
+
+//direct jump to desired lo
+smooth_x = _desired_x;
+smooth_y = _desired_y;
+camera_set_view_pos(global.camera[0].ID, _desired_x, _desired_y);
