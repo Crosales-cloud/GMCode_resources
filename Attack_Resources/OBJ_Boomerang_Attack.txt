@@ -1,0 +1,116 @@
+// Inherit the Attack parent event
+event_inherited();
+
+attack = 5;
+hit_list = [];
+through_walls = true;
+
+image_angle = direction_selection(8);
+rotation_speed = 15;
+speed_default = 5;
+dir_current = 0;
+
+//distance to edge to trigger a state change
+edge_distance = 64;
+//edges of current viewport
+edge_left = camera_get_view_x(global._camera);
+edge_right = edge_left + global._camera_width;
+edge_top = camera_get_view_y(global._camera);
+edge_bottom = edge_top + global._camera_height;
+
+//STATE
+states = {
+	LEAVE: 0,
+	RETURN: 1,
+}
+state = states.LEAVE 
+
+//Step Event 
+image_angle += rotation_speed;
+
+//perform ONLY the action for current state
+switch(state)
+{
+	case states.LEAVE:
+		//horizontal and vertical movement speed
+		var _speed_x = 0;
+		var _speed_y = 0;
+		//distance to edge
+		var _distance_x = edge_distance + 1;
+		var _distance_y = edge_distance + 1;
+		
+		//horizontal distance to edge
+		if (dir_current > 90 && dir_current <= 270)
+		{ //left
+			_distance_x = abs(edge_left - bbox_left)
+		}
+		else
+		{ //right
+			_distance_x = abs(edge_right - bbox_right)
+		}
+		_speed_x = clamp((_distance_x / 44) * speed_default, 1, _distance_x);
+		
+		//vert distance to edge
+		if(dir_current < 180)
+		{ //up
+			_distance_y = abs(edge_top - bbox_top);
+		}
+		else
+		{ //down
+			_distance_y = abs(edge_bottom - bbox_bottom);
+		}
+		_speed_y = clamp((_distance_y / 55) * speed_default, 1, _distance_y);
+		
+		//move in curent direction
+		x += lengthdir_x(min(_speed_x,_speed_y), dir_current);
+		y += lengthdir_y(min(_speed_x,_speed_y), dir_current);
+		//alt to move four corners
+		//x += lengthdir_x(_speed_x, dir_current);
+		//y += lengthdir_y(_speed_y, dir_current);
+		
+		//change state
+		//if too close to edge, change to RETURN state
+		if(_distance_x < edge_distance || _distance_y < edge_distance)
+		{
+			state = states.RETURN;
+			show_debug_message("It is working");
+			//refresh hit_list so it can hit things on return
+			hit_list = [];
+		}
+
+	break;
+	case states.RETURN:
+		if(instance_exists(wielder))
+		{
+			dir_current = point_direction(x, y, wielder.x, wielder.y);
+			var distance_player = point_distance(x, y, wielder.x, wielder.y);
+			if(distance_player <= sprite_width)
+			{
+				instance_destroy(self);
+				show_debug_message("It is gone!")
+			}
+			var speed_p = clamp((distance_player / 33) * speed_default, speed_default * 2, distance_player);
+			
+			x += lengthdir_x(speed_p, dir_current);
+			y += lengthdir_y(speed_p, dir_current);
+		}
+		else
+		{
+			instance_destroy(self);
+		}
+		
+	break;
+	default:
+		//shouldn't happen so give alert
+		show_debug_message("Boomerang in improper state: " + state)
+}
+// Draw Gui Event
+_x = 10
+_y = 20;
+_line = 0;
+
+draw_text(10,10 + (_y*_line++),edge_left);
+draw_text(10,10 + (_y*_line++),edge_right);
+draw_text(10,10 + (_y*_line++),edge_top);
+draw_text(10,10 + (_y*_line++),edge_bottom);
+draw_text(10,10 + (_y*_line++),state);

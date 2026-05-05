@@ -1,0 +1,31 @@
+//Create Event 
+// Inherit the parent event
+event_inherited();
+attack = 10
+speed_default = 7;
+
+function init(_wielder = noone)
+{
+	if(_wielder != noone)
+	{
+		wielder = _wielder;
+		dir_current = wielder.dir_current;
+		image_angle = dir_current;
+	}
+	
+	var second = instance_create_layer(x, y,"effects",obj_attack_fire);
+	var third = instance_create_layer(x, y,"effects",obj_attack_fire);
+	
+	second.set_direction(dir_current + 5);
+	third.set_direction(dir_current - 5);
+}
+
+//Step Event 
+// Move
+x += lengthdir_x(speed_default, dir_current);
+y += lengthdir_y(speed_default, dir_current);
+
+if( array_length(hit_list) > 0)
+{
+	instance_destroy(self);
+}
