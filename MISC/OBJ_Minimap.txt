@@ -1,0 +1,129 @@
+//create event 
+STATES = {
+	OFF: 0,
+	MINI: 1,
+	FULL: 2,
+}
+state = STATES.OFF 
+
+function state_toggle()
+{
+	state++;
+	if(state > STATES.FULL)
+	{
+		state = STATES.OFF;
+	}
+}
+
+//Step Event 
+if keyboard_check_pressed(ord("M")){
+	state_toggle()
+}
+
+//Draw GUI
+if(state != STATES.OFF)
+{
+	var _s = 1; 
+	var _map_width = 100;
+	var _map_height = 100; 
+	var _map_x = 10;
+	var _map_y = 10; 
+	var _alpha = 0.4;
+	switch(state)
+	{
+		case STATES.MINI: 
+		//scale 
+		_s = 18; 
+		//scaled map size 
+		_map_width = (global.camera[0].width/_s)*3;
+		_map_height = (global.camera[0].height/_s)*3;
+		//map location on screen 
+		//top right corner 
+		_map_x =  view_get_wport(0) - _map_width - 16; 
+		_map_y = 16;
+		//transparency 
+		_alpha = 0.5; 
+	break;
+	case STATES.FULL: 
+		//scale 
+		_s = 6; 
+		//scaled map size 
+		_map_width = (global.camera[0].width/_s)*3;
+		_map_height = (global.camera[0].height/_s)*3;
+		//map location on screen 
+		//top right corner 
+		_map_x =  (view_get_wport(0)/2) - (_map_width/2); 
+		_map_y = (view_get_hport(0)/2) - (_map_height/2);
+		//transparency 
+		_alpha = 0.9; 
+	break;
+}
+//location of camera 
+var _camera_x = camera_get_view_x(global.camera[0].ID);
+var _camera_y = camera_get_view_y(global.camera[0].ID);
+//visibility of what is included in the minimap 
+var _visible_left = _camera_x - global.camera[0].width;
+var _visible_right = _camera_x + (2 * global.camera[0].width);
+var _visible_top = _camera_y - global.camera[0].height;
+var _visible_bottom = _camera_y + (2 * global.camera[0].height); 
+//draws background
+draw_set_colour(c_dkgray);
+draw_set_alpha(_alpha);
+draw_rectangle(_map_x,_map_y,_map_x + _map_width,_map_y + _map_height, false);
+//draws object in minimap 
+with(obj_wall)
+{
+	//get scaled sprite edge values 
+	var _sprite_left = x - sprite_xoffset;
+	var _sprite_top = y - sprite_yoffset; 
+	var _sprite_right = _sprite_left + sprite_width; 
+	var _sprite_bottom = _sprite_top + sprite_height;
+	if(_sprite_right > _visible_left && _sprite_left < _visible_right && _sprite_bottom > _visible_top && _sprite_top < _visible_bottom)
+	{
+		var _draw_x = (clamp(_sprite_left, _visible_left,_visible_right) - _visible_left)/_s;
+		var _draw_y = (clamp(_sprite_top, _visible_top,_visible_bottom) - _visible_top)/_s;
+		var _draw_right = (clamp(_sprite_right, _visible_left,_visible_right) - _visible_left)/_s;
+		var _draw_bottom = (clamp(_sprite_bottom, _visible_top,_visible_bottom) - _visible_top)/_s;
+		var _draw_sprite_width = _draw_right - _draw_x;
+		var _draw_sprite_height = _draw_bottom - _draw_y;
+		//RECTANGLE 
+		draw_set_color(c_lime);
+		draw_rectangle(_map_x+_draw_x,_map_y + _draw_y, _map_x + _draw_right, _map_y + _draw_bottom, false)
+		
+		
+	}
+
+}
+ draw_sprite_stretched(spr_minimap, 0, _map_x -9, _map_y - 9,_map_width + 18, _map_height +18);
+}
+
+
+/*
+//CIRCLE
+draw_set_color(c_lime);
+draw_circle(_map_x + _draw_x + (_draw_sprite_width / 2), 
+			_map_y+_draw_y +(_draw_sprite_width/2), 
+			(_draw_sprite_width / 2),false);
+			
+//RECTANGLE 
+draw_set_color(c_lime);
+draw_rectangle(_map_x+_draw_x,_map_y + _draw_y, _map_x + _draw_right, _map_y + _draw_bottom, false)
+
+//SPRITE Normal
+draw_sprite_ext(sprite_index, 0 , _map_x + _draw_x + (sprite_xoffset / _s), _map_y + _draw_y + (sprite_yoffset / _s), 1/_s, 1/_s,0,c_white,_alpha);
+
+//SPRITE 9-slice 
+draw_sprite_stretched_ext(sprite_index, 0, _map_x + _draw_x + (sprite_xoffset / _s), _map_y + _draw_y + (sprite_yoffset / _s), _draw_sprite_width, _draw_sprite_height,c_white,_alpha);
+
+//SPRITE Stretched in room 
+draw_sprite_pos(sprite_index,  0,
+_map_x + _draw_x,
+_map_y + _draw_y,
+_map_x + _draw_x + _draw_sprite_width,
+_map_y + _draw_y,
+_map_x + _draw_x + _draw_sprite_width,
+_map_y + _draw_y + _draw_sprite_height,
+_map_x + _draw_x,
+_map_y + _draw_y + _draw_sprite_height,
+_alpha);
+*/
