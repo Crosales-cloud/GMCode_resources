@@ -1,0 +1,119 @@
+
+//Step
+if(state == states.DEAD)
+{
+	path_clear_points(path)
+}
+else
+{
+	// --- CONTINOUS logic for ALL states
+	//do stuff that happens during EVERY state
+	//can see player?
+	if(noone == collision_line(x,y,obj_player.x, obj_player.y, obj_terrain_unpassable, false, false)) 
+	{
+		time_target_last_seen = 0;
+		//player location
+		target_x = obj_player.x;
+		target_y = obj_player.y;
+	}
+	//heas seen the player recently
+	if(time_target_last_seen <= time_reaction_max)
+	{
+		if( --time_reaction <= 0 )
+		{
+			//reset reaction time
+			time_reaction = time_reaction_max;
+			state_change(states.CHASE);
+		}
+	}
+	//has it been too long since time_target_last_seen
+	//patrol our starting location again
+	if(++time_target_last_seen > time_target_last_seen_max)
+	{
+		target_x = xstart;
+		target_y = ystart;
+	}
+	//max distance from start position
+	if(point_distance(x,y,xstart,ystart) > distance_max)
+	{
+		target_x = xstart;
+		target_y = ystart;
+		state_change(states.RETURN);
+	}
+	//too close to edge of camera
+	if(bbox_left - sprite_width < camera_get_view_x(global.camera[0].ID) ||
+		bbox_right + sprite_width > camera_get_view_x(global.camera[0].ID) + global.camera[0].width ||
+		bbox_top - sprite_height < camera_get_view_y(global.camera[0].ID) ||
+		bbox_bottom + sprite_height > camera_get_view_y(global.camera[0].ID) + global.camera[0].height )
+		{
+			//if pathfinding
+			target_x = xstart;
+			target_y = ystart;
+			state_change(states.RETURN);
+		}
+		//finishing a path?
+		if(path_position > 0.9)
+		{
+			new_path();
+		}
+	
+	// --- CONTINOUS logic for current state
+	switch(state) {
+		case states.PATROL:
+		//patrol stuff
+		//move around
+		move_contact(dir_current, speed_default, obj_terrain_unpassable);
+		//stopped moving?
+		if(x == xprevious && y == yprevious)
+		{
+			//do a turn
+			dir_current = direction_selection(8);
+		}
+		
+		//patrol get too far away?
+		if(point_distance(target_x, target_y,x,y) > distance_patrol_max)
+		{
+			state_change(states.RETURN);
+		}
+		
+		break;
+		case states.RETURN:
+		//return stuff
+		
+		//reached target
+		if(point_distance(x,y,target_x,target_y) < target_distance)
+		{
+			//more likely we need to patrol
+			state_change(states.PATROL);
+		}
+		break;
+		case states.CHASE:
+		//chase stuff
+		//refresh path regularly
+		if(time_reaction >= time_reaction_max)
+		{
+			new_path();
+		}
+		///////////////////////////////////////////////
+		if(time_target_last_seen > time_reaction_max)
+		{
+			state_change(states.CHASE_LAST);
+		}
+		if(!path_exists(path))
+		{
+			new_path();
+		}
+		//////////////////////////////////////////////
+		break;
+		case states.CHASE_LAST:
+		//chase_last stuff
+		//reached target?
+		if(point_distance(x,y,target_x,target_y) < target_distance)
+		{
+			state_change(states.PATROL);
+		}
+		break;
+	
+	}
+
+}
