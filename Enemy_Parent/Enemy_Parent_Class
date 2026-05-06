@@ -1,0 +1,308 @@
+//Create Event
+speed_default = 3;
+target_x = xstart;
+target_y = ystart;
+target_distance = speed_default*3;
+time_reaction_max = (GAME_FPS/2) + irandom(GAME_FPS/2);
+time_reaction = time_reaction_max
+time_target_last_seen_max = 32 *GAME_FPS;
+time_target_last_seen = time_reaction_max
+time_patrol_max = GAME_FPS * 9;
+time_patrol =  0;
+distance_patrol_max = sprite_width * 5;
+distance_max = global.camera[0].width;
+path = path_add();
+enemy_grid_init(true);
+attack = 5;
+hp_start = 45;
+hp = hp_start;
+hit_list = [];
+through_walls = false;
+point_value = 0;
+hit_check = 0; 
+
+states = {
+	DEAD: 0,
+	ACTIVE: 1,
+	PATROL: 2,
+	RETURN: 3,
+	CHASE: 4,
+	CHASE_LAST: 5
+}
+state = states.ACTIVE
+
+
+
+//hit by an attack
+function get_hit(_attack = noone)
+{
+	if(_attack != noone && state != state.DEAD)
+	{
+		if(array_contains(_attack.hit_list, self))
+		{
+			//do nothing
+			//already hit
+		}
+		else{
+			//take damage
+			hp -= _attack.attack;
+			//add to hit list
+			array_push(_attack.hit_list, self);
+
+		}
+	}
+}
+
+//stuck in a wall?
+function terrain_check(_obj = noone)
+{
+	//give the option of changing this
+	if(_obj == noone)
+	{
+		_obj = obj_wall;
+	}
+	if( through_walls != true )
+	{
+		if (instance_place(x,y, _obj) != noone)
+		{
+			deflect(other, speed_default);
+		}
+	}
+}
+
+function new_path()
+{
+	path_clear_points(path)
+	mp_grid_path(global.grid_enemy,path,x,y,target_x,target_y,true);
+	path_start(path,speed_default * .7, path_action_stop, false);
+}
+
+function state_change(_new_state = -1)
+{
+	if(state != _new_state)
+	{
+		//EXIT logic
+		switch(state){
+			//Exit
+			case states.PATROL:
+			time_patrol = 0;
+			break;
+			case states.RETURN:
+			path_clear_points(path)
+			break;
+			case states.CHASE:
+			path_clear_points(path)
+			break;
+			case states.CHASE_LAST:
+			path_clear_points(path)
+			break;
+		}
+		state = _new_state;
+		//Enter Logic
+		switch(state){
+			//ENTER Stuff
+			case states.PATROL:
+			time_patrol = 0;
+			dir_current = direction_selection()
+			path_clear_points(path)
+			break;
+			case states.RETURN:
+			new_path();
+			break;
+			case states.CHASE:
+			new_path();
+			break;
+			case states.CHASE_LAST:
+			new_path();
+			break;
+		}
+	}
+}
+
+
+//Step
+if(state == states.DEAD)
+{
+	path_clear_points(path)
+}
+else
+{
+	// --- CONTINOUS logic for ALL states
+	//do stuff that happens during EVERY state
+	//can see player?
+	if(noone == collision_line(x,y,obj_player.x, obj_player.y, obj_terrain_unpassable, false, false)) 
+	{
+		time_target_last_seen = 0;
+		//player location
+		target_x = obj_player.x;
+		target_y = obj_player.y;
+	}
+	//heas seen the player recently
+	if(time_target_last_seen <= time_reaction_max)
+	{
+		if( --time_reaction <= 0 )
+		{
+			//reset reaction time
+			time_reaction = time_reaction_max;
+			state_change(states.CHASE);
+		}
+	}
+	//has it been too long since time_target_last_seen
+	//patrol our starting location again
+	if(++time_target_last_seen > time_target_last_seen_max)
+	{
+		target_x = xstart;
+		target_y = ystart;
+	}
+	//max distance from start position
+	if(point_distance(x,y,xstart,ystart) > distance_max)
+	{
+		target_x = xstart;
+		target_y = ystart;
+		state_change(states.RETURN);
+	}
+	//too close to edge of camera
+	if(bbox_left - sprite_width < camera_get_view_x(global.camera[0].ID) ||
+		bbox_right + sprite_width > camera_get_view_x(global.camera[0].ID) + global.camera[0].width ||
+		bbox_top - sprite_height < camera_get_view_y(global.camera[0].ID) ||
+		bbox_bottom + sprite_height > camera_get_view_y(global.camera[0].ID) + global.camera[0].height )
+		{
+			//if pathfinding
+			target_x = xstart;
+			target_y = ystart;
+			state_change(states.RETURN);
+		}
+		//finishing a path?
+		if(path_position > 0.9)
+		{
+			new_path();
+		}
+	
+	// --- CONTINOUS logic for current state
+	switch(state) {
+		case states.PATROL:
+		//patrol stuff
+		//move around
+		move_contact(dir_current, speed_default, obj_terrain_unpassable);
+		//stopped moving?
+		if(x == xprevious && y == yprevious)
+		{
+			//do a turn
+			dir_current = direction_selection(8);
+		}
+		
+		//patrol get too far away?
+		if(point_distance(target_x, target_y,x,y) > distance_patrol_max)
+		{
+			state_change(states.RETURN);
+		}
+		
+		break;
+		case states.RETURN:
+		//return stuff
+		
+		//reached target
+		if(point_distance(x,y,target_x,target_y) < target_distance)
+		{
+			//more likely we need to patrol
+			state_change(states.PATROL);
+		}
+		break;
+		case states.CHASE:
+		//chase stuff
+		//refresh path regularly
+		if(time_reaction >= time_reaction_max)
+		{
+			new_path();
+		}
+		///////////////////////////////////////////////
+		if(time_target_last_seen > time_reaction_max)
+		{
+			state_change(states.CHASE_LAST);
+		}
+		if(!path_exists(path))
+		{
+			new_path();
+		}
+		//////////////////////////////////////////////
+		break;
+		case states.CHASE_LAST:
+		//chase_last stuff
+		//reached target?
+		if(point_distance(x,y,target_x,target_y) < target_distance)
+		{
+			state_change(states.PATROL);
+		}
+		break;
+	
+	}
+
+}
+
+
+/*
+//TESTING PURPOSES
+//REGENERATE
+if(keyboard_check(vk_space) || (instance_exists(obj_controller) && obj_controller.valid() && gamepad_button_check(obj_controller.controller[0], gp_start)) )
+{
+	//respawn
+	state = states.ACTIVE
+	hp = hp_start
+}
+//*
+/*	case states.DEAD:
+		//dead state
+		path_clear_points(path)
+		hp = 0
+		//instance_destroy(self.id)
+	break;
+	case states.ACTIVE:
+		if(hp <= 0)
+		{
+			//dead
+			hp = 0
+			state = states.DEAD;
+		}
+		//stuck in a wall?
+		terrain_check();
+	break;*/
+
+//draw event
+switch(state)
+{
+	case states.DEAD:
+		//dead state
+		hp = 0
+		//instance_destroy(self.id)
+	break;
+	case states.ACTIVE:
+		if(hp <= 0)
+		{
+			//dead
+			hp = 0
+			state = states.DEAD;
+			//add score to total
+			//global.SCORE += point_value;
+		}
+		//stuck in a wall?
+		terrain_check();
+	break;
+}
+if(state != states.DEAD)
+{
+	draw_sprite_ext(sprite_index, image_index, x, y, image_xscale, image_yscale,dir_current,c_white,image_alpha);
+	draw_healthbar(x-20,bbox_top-6,x+20,bbox_top-5,(hp/hp_start)*100,c_black,c_red,c_green,0,true,false);
+}
+
+/*
+//TESTING PURPOSES
+//REGENERATE
+if(keyboard_check(vk_space) || (instance_exists(obj_controller) && obj_controller.valid() && gamepad_button_check(obj_controller.controller[0], gp_start)) )
+{
+	//respawn
+	state = states.ACTIVE
+	hp = hp_start
+}
+//*/
+//outside of room event
+instance_deactivate_object(self);
