@@ -1,0 +1,31 @@
+//create event
+// Inherit the parent event
+event_inherited();
+
+attack = 1;
+hp_start = 45;
+hp = hp_start;
+point_value = 10;
+function get_hit(_attack = noone)
+{
+	if(_attack != noone && state != states.DEAD)
+	{
+		if(array_contains(_attack.hit_list, self))
+		{
+			//do nothing
+			//already hit
+		}
+		else{
+			//take damage
+			hp -= _attack.attack;
+			//add to hit list
+			array_push(_attack.hit_list, self);
+			//add score to total
+			score += point_value;
+		}
+	}
+}
+
+//Key_space_press event
+state = states.ACTIVE;
+hp = hp_start;
