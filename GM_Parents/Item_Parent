@@ -1,0 +1,20 @@
+states = {
+	DEAD: 0,
+	ACTIVE: 1,
+}
+state = states.ACTIVE;
+
+
+function activate()
+{
+	state = states.ACTIVE;
+}
+
+
+
+
+
+item = [];
+item[ITEM_DATA.AMOUNT] = 1; 
+item[ITEM_DATA.ICON] = self.sprite_index; 
+item[ITEM_DATA.TYPE] = ITEM_TYPES.NONE
