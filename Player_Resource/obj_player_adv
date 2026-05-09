@@ -1,0 +1,163 @@
+//Create Event 
+image_speed = 0;
+speed_default = 5 
+speed_diagonal = speed_default * 0.707 
+dir_current = 0 
+hp = 100 
+hp_max = hp
+move_origin_x =0; 
+move_origin_y = 0;
+mouse_distance = 0;
+mouse_speed = 0;
+attacking = 0;
+attack_delay = 25;
+meleeCooldown = 5;
+rangeCooldown = 20;
+meleeCooldown = 3;
+
+//attacks
+weapon_list = {
+	MELEE : obj_melee_item,
+	MELEE_UPGRADE : obj_melee_item,
+	FIRE: obj_fire_item,
+	FIRE_SPREAD: obj_spread_item,
+	HOMING: obj_homing_item,
+	BOOMERANG: obj_boomerang_item,
+	BOMB: obj_Bomb_item
+};
+weapon_a = obj_melee;
+weapon_b = obj_fire;
+
+//weapon pickup
+function player_weapon_pickup(_obj = obj_item_parent)
+{
+	var _success = false;
+	_obj = instance_place(x, y, _obj);
+	if (_obj != noone)
+	{
+		switch(_obj.object_index)
+		{
+			case weapon_list.MELEE:
+			weapon_a = obj_melee;
+			_success = true;
+			break;
+			case weapon_list.MELEE_UPGRADE:
+			weapon_a = obj_melee;
+			_success = true;
+			break;
+			case weapon_list.FIRE:
+			weapon_b = obj_fire;
+			_success = true;
+			break;
+			case weapon_list.FIRE_SPREAD:
+			weapon_b = obj_spread_fire;
+			_success = true;
+			break;
+			case weapon_list.HOMING:
+			weapon_b = obj_homing_attack;
+			_success = true;
+			break;
+			case weapon_list.BOOMERANG:
+			weapon_b = obj_boomerang_attack;
+			_success = true;
+			break;
+			case weapon_list.BOMB:
+			weapon_b = Obj_Bomb_Attack;
+			_success = true;
+			break;
+		}
+		instance_destroy(_obj);
+	}
+	return _success;
+}
+
+//Step event
+//Step Event 
+//method 06
+	var _up = 0;
+	var _down = 0;
+	var _left = 0;
+	var _right = 0;
+	
+	if(keyboard_check(ord("W")))
+	{
+		_up =1;
+	}
+	if(keyboard_check(ord("S")))
+	{
+		_down =1;
+	}
+	if(keyboard_check(ord("A")))
+	{
+		_left =1;
+	}
+	if(keyboard_check(ord("D")))
+	{
+		_right =1;
+	} 
+	
+	var _hspd = _right - _left;
+	var _vspd = _down - _up;
+	
+	if(_hspd != 0 || _vspd != 0)
+	{
+		sprite_index = spr_player;
+		dir_current = point_direction(0,0,_hspd,_vspd);
+		move_slide(dir_current,speed_default)
+	}
+	else
+	{
+		sprite_index = spr_player;
+	}
+	
+	if(hp<=0)
+	{
+		game_restart()
+	}
+	if(attacking > 0) 
+	{
+		attacking -=1;
+	}
+	else
+	{
+		if( keyboard_check(ord("M")))
+	
+		{
+			//MELEE attack
+			attacking = attack_delay
+			var _attack_a = instance_create_layer(x, y,"effects",weapon_a)
+			_attack_a.init(self);
+			attacking = attack_delay * _attack_a.delay_multiplier;
+				
+		}
+		if( keyboard_check(ord("N")))
+			
+		{
+			//RANGED attack
+			var _attack_b = instance_create_layer(x, y, "effects",weapon_b);
+			_attack_b.init(self);
+			attacking = attack_delay * _attack_b.delay_multiplier;
+		}	
+	}
+	if(meleeCooldown>0) meleeCooldown = meleeCooldown -1;
+	if(rangeCooldown>0) rangeCooldown = rangeCooldown -1;
+	
+//Alarm[0] event
+other.hit_check = 0;
+//Draw Event 
+draw_sprite_ext(sprite_index,image_index,x,y,image_xscale,image_yscale,0,c_white,image_alpha)
+draw_healthbar(bbox_left,bbox_top-6, bbox_right,bbox_top-5,((hp/hp_max)*100),c_black,c_red,c_green,0,true,false
+//Collision with Enemy parent 
+if (other.state != other.states.DEAD) 
+{
+	if other.hit_check = 0
+	{
+		//make it so next hit wont damage anyone
+		other.hit_check = 1;
+		//when hit, damage player
+		hp -= other.attack;
+		alarm_set(0,1)
+	}
+}
+//Collision with Item parent
+player_weapon_pickup();
