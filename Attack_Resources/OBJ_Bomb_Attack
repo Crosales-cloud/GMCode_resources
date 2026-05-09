@@ -1,0 +1,20 @@
+//Create Event 
+// Inherit the parent event
+event_inherited();
+attack = 1;
+speed_default = 6;
+dir_current = direction_selection(8);
+//Step Event
+//Step Event 
+// Move
+x += lengthdir_x(speed_default, dir_current);
+y += lengthdir_y(speed_default, dir_current);
+
+
+if( array_length(hit_list) > 0)
+{
+	
+	instance_create_layer(x,y,"effects",Obj_Explosion);
+	instance_destroy(self);
+}
+//
