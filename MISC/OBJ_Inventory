@@ -1,0 +1,149 @@
+//Create event
+for(var _i = 0; _i < INV_MAX; _i++)
+{
+	inventory[_i][ITEM_DATA.AMOUNT] = 0;
+	inventory[_i][ITEM_DATA.TYPE] = ITEM_TYPES.NONE;
+	inventory[_i][ITEM_DATA.ICON] = false;
+}
+//currently selected item
+inv_index = 0;
+
+//image index for selector image
+selector_image_index = 0;
+INV_MIN = 0
+
+
+STATES = {
+	OFF: 0,
+	ON: 1,
+}
+state = STATES.OFF
+
+function state_toggle()
+{
+	state++;
+	if(state > STATES.ON)
+	{
+		state = STATES.OFF;
+	}
+}
+
+weapon_list = {
+	MELEE : ITEM_TYPES.SWORD,
+	MELEE_UPGRADE : ITEM_TYPES.SWORD,
+	FIRE: ITEM_TYPES.FIRE,
+	FIRE_SPREAD: ITEM_TYPES.SPREAD,
+	HOMING: ITEM_TYPES.HOMING,
+	BOOMERANG: ITEM_TYPES.BOOMERANG,
+	BOMB: ITEM_TYPES.BOMB,
+};
+
+//weapon pickup
+function player_weapon_select(_obj = obj_inventory)
+{
+	var _success = false;
+	_obj = inventory_search(_obj,inventory[inv_index][ITEM_DATA.TYPE]);
+	if (_obj != noone)
+	{
+		switch(_obj.object_index)
+		{
+			case weapon_list.MELEE:
+			weapon_a = obj_melee;
+			_success = true;
+			break;
+			case weapon_list.MELEE_UPGRADE:
+			weapon_a = obj_melee;
+			_success = true;
+			break;
+			case weapon_list.FIRE:
+			weapon_b = obj_fire;
+			_success = true;
+			break;
+			case weapon_list.FIRE_SPREAD:
+			weapon_b = obj_spread_fire;
+			_success = true;
+			break;
+			case weapon_list.HOMING:
+			weapon_b = obj_homing_attack;
+			_success = true;
+			break;
+			case weapon_list.BOOMERANG:
+			weapon_b = obj_boomerang_attack;
+			_success = true;
+			break;
+			case weapon_list.BOMB:
+			weapon_b = Obj_Bomb_Attack;
+			_success = true;
+			break;
+		}
+	}
+	return _success;
+}
+
+//step event 
+if keyboard_check_pressed(ord("I"))
+{
+	state_toggle();
+} 
+//player_weapon_select();
+
+//Draw GUI Event 
+if(state == STATES.ON)
+{
+
+	
+
+	//loop through the inventory array
+	//draw each item 
+	//shift over for each item
+	//then draw the "selected" icon in it's correct place
+
+	//var _xx = x + 16;
+	//var _yy = y + 250;
+	var _width = 64;
+	//var _xxx = x + 48
+	for(var _i = 0; _i < INV_MAX; ++_i)
+	{
+		draw_sprite_ext(spr_inventory,image_index,_xxx + (_i*50),y + 288,image_xscale,image_yscale,0,c_white,image_alpha)
+		if(inventory[_i][ITEM_DATA.TYPE] != ITEM_TYPES.NONE)
+		{
+			
+			draw_sprite(inventory[_i][ITEM_DATA.ICON], image_index,_xx + (_i*_width),y+300)
+		}
+	}  
+
+	draw_sprite(spr_selected, image_index,_xx + (inv_index * 50), _yy)
+
+}
+//Global Right Press event 
+
+if(state == STATES.ON)
+{
+	var _item = inventory_remove_location(obj_inventory, inv_index);
+	
+
+	if( _item != false)
+	{
+	
+		inventory_place_item(_item[ITEM_DATA.TYPE], _item[ITEM_DATA.AMOUNT], mouse_x,mouse_y);
+	}
+}
+//Key Up Event 
+
+if(state == STATES.ON)
+{
+	inv_index +=1;
+	if(inv_index >= INV_MAX)
+	{
+		inv_index = 8;
+	}
+}
+//Key Down Event
+
+if(state == STATES.ON)
+{
+	if(inv_index > INV_MIN)
+	{
+		inv_index -= 1;
+	}
+}
