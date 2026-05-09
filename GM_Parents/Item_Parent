@@ -1,3 +1,4 @@
+//create event
 states = {
 	DEAD: 0,
 	ACTIVE: 1,
@@ -18,3 +19,12 @@ item = [];
 item[ITEM_DATA.AMOUNT] = 1; 
 item[ITEM_DATA.ICON] = self.sprite_index; 
 item[ITEM_DATA.TYPE] = ITEM_TYPES.NONE
+//draw event
+if(state != states.DEAD)
+{
+	draw_self()
+}
+//Collision with player 
+if(state != states.DEAD && inventory_add(obj_inventory, item, obj_inventory.inv_index)){
+	state = states.DEAD
+}
