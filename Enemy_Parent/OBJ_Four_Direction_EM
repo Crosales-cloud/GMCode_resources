@@ -1,1 +1,56 @@
+//Create Event
+// Inherit the parent event
+event_inherited();
 
+attack = 1;
+hp_start = 45;
+hp = hp_start;
+point_value = 15;
+function get_hit(_attack = noone)
+{
+	if(_attack != noone && state != states.DEAD)
+	{
+		if(array_contains(_attack.hit_list, self))
+		{
+			//do nothing
+			//already hit
+		}
+		else{
+			//take damage
+			hp-= _attack.attack;
+			//add to hit list
+			array_push(_attack.hit_list, self);
+			//add score to total
+			//score += point_value;
+		}
+	}
+}
+
+//start random direction
+dir_current = direction_selection(4);
+TURN_TIME = GAME_FPS * 5; 
+alarm[0] = TURN_TIME;
+
+//speed/direction
+speed_default = 2;
+//Step Event
+event_inherited();
+
+
+switch(state)
+{
+	case states.DEAD:
+		//nothing
+	break;
+	case states.ACTIVE:
+		//move around
+		move_slide(dir_current, speed_default);
+		//stuck?
+		if(x == xprevious && y == yprevious)
+		{
+			//do a turn
+			alarm[0] = 1;
+		}
+	break;
+}
+//
